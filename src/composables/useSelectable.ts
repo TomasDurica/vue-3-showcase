@@ -1,4 +1,6 @@
-export const useSelectable = <TItem, TKey>(collection: TItem[], key: (item: TItem) => TKey) => {
+import type { Ref } from "vue"
+
+export const useSelectable = <TItem, TKey>(collection: Ref<TItem[]>, key: (item: TItem) => TKey) => {
   const selection = reactive(new Set<TKey>())
   
   watch(collection, (value) => {
@@ -25,15 +27,15 @@ export const useSelectable = <TItem, TKey>(collection: TItem[], key: (item: TIte
     selection.clear()
 
     if (value) {
-      collection.map(key).forEach(id => selection.add(id))
+      collection.value.map(key).forEach(id => selection.add(id))
     }
   } 
 
   const selected = computed(() => selection.size)
 
   const isSelected = (item: TItem) => selection.has(key(item))
-  const isAllSelected = computed(() => selection.size === collection.length)
-  const isPartiallySelected = computed(() => !!selection.size && selection.size < collection.length)
+  const isAllSelected = computed(() => selection.size === collection.value.length)
+  const isPartiallySelected = computed(() => !!selection.size && selection.size < collection.value.length)
 
 
   return {

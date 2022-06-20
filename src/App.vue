@@ -49,7 +49,7 @@
 
   const playerCount = computed(() => players.value.length )
 
-  const { toggle, toggleAll, isSelected, isAllSelected, isPartiallySelected, selected } = useSelectable(players.value, (player) => player.id)
+  const { toggle, toggleAll, isSelected, isAllSelected, isPartiallySelected, selected } = useSelectable(players, (player) => player.id)
 
   const isDialogShown = ref(false)
 
