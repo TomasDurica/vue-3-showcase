@@ -1,4 +1,7 @@
 <script setup lang="ts">
+  import ModalDialog from "./components/modal-dialog.vue"
+  import { useSelectable } from "./composables/useSelectable";
+
   let id = 10
 
   type Player = {
@@ -7,10 +10,14 @@
   }
 
   const players = ref<Player[]>([
-    { id: 1, name: 'Foo' }
+    { id: 1, name: 'Foo' },
+    { id: 2, name: 'Bar' },
+    { id: 3, name: 'Goo' },
+    { id: 4, name: 'Baz' },
   ])
 
   const name = ref('')
+  const hasErrors = ref(false)
 
   const addPlayer = () => {
     if (!name.value) {
@@ -30,47 +37,38 @@
     })
   }
 
-  const playerCount = computed(() => players.value.length )
-
-  const hasErrors = ref(false)
-
+  const removePlayers = () => {
+    players.value = players
+      .value
+      .filter(p => !isSelected(p))
+  }
+  
   watch([name], ([value]) => {
     hasErrors.value = !value
   })
 
-  const selection = reactive(new Set<number>([1]))
+  const playerCount = computed(() => players.value.length )
 
-  const toggle = (id: number) => {
-    if (selection.has(id)) {
-      selection.delete(id)
-    } else {
-      selection.add(id)
-    }
-  }
+  const { toggle, toggleAll, isSelected, isAllSelected, isPartiallySelected, selected } = useSelectable(players.value, (player) => player.id)
 
-  const removePlayers = () => {
-    players.value = players
-      .value
-      .filter(p => !selection.has(p.id))
-  }
+  const isDialogShown = ref(false)
 
-  watch(players, (value) => {
-    const ids = new Set(value.map(p => p.id))
-
-    Array.from(selection.values())
-      .filter(id => !ids.has(id))
-      .forEach(id => selection.delete(id))
-  })
-
+  
 </script>
 
 <template>
   <div class="flex justify-center pt-16 min-h-screen relative"> 
-    <div class="flex flex-col gap-4 w-2xl">
+    <div class="flex flex-col gap-4 w-xl">
       <div class="flex gap-4 items-center h-16">
-        <template v-if="!selection.size">
-          <input class="input input--outline flex-1" :class="{'!border-red-400': !!hasErrors }" v-model="name"/>
-          <button class="btn btn--filled" @click="addPlayer" :disabled="hasErrors">Add Player</button>
+        <input class="checkbox" type="checkbox" 
+          :disabled="!players.length"
+          :checked="isAllSelected"
+          :indeterminate="isPartiallySelected"
+          @click="toggleAll"
+        />
+        
+        <template v-if="!selected">
+          <button class="btn btn--filled" @click="isDialogShown = true" :disabled="hasErrors">Add Player</button>
         </template>
 
         <template v-else>
@@ -80,15 +78,17 @@
 
       <template v-if="!!playerCount">
         Players {{ playerCount }}
-        Selection {{ selection.size }}
+        Selection {{ selected }}
 
         <ul class="list-none p-0 m-0">
-          <li v-for="player in players" :key="player.name" class="flex items-center gap-4"> 
+          <li 
+              v-for="player in players" :key="player.name" 
+              class="flex items-center gap-4 mb-2"> 
           
             <input 
               type="checkbox" class="checkbox" 
-              @click="toggle(player.id)"
-              :checked="selection.has(player.id)"
+              @click="toggle(player)"
+              :checked="isSelected(player)"
             />
             <span> {{ player.name }} </span>
           
@@ -98,6 +98,13 @@
 
       <div v-else> There are no players </div>
     </div>
+    <modal-dialog v-model="isDialogShown" @confirm="addPlayer">
+      <input 
+          class="input input--outline" 
+          :class="{'!border-red-400': !!hasErrors }" 
+          v-model="name"
+      />
+    </modal-dialog>
   </div>
 </template>
 
