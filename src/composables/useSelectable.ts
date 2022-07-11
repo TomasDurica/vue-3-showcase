@@ -34,9 +34,8 @@ export const useSelectable = <TItem, TKey>(collection: Ref<TItem[]>, key: (item:
   const selected = computed(() => selection.size)
 
   const isSelected = (item: TItem) => selection.has(key(item))
-  const isAllSelected = computed(() => selection.size === collection.value.length)
+  const isAllSelected = computed(() => !!collection.value.length && selection.size === collection.value.length)
   const isPartiallySelected = computed(() => !!selection.size && selection.size < collection.value.length)
-
 
   return {
     selected,

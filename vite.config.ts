@@ -19,7 +19,9 @@ export default defineConfig({
     }),
     AutoImport({
       imports: [
-        'vue'
+        'vue',
+        'vue-router',
+        'pinia'
       ],
       eslintrc: {
         enabled: true
