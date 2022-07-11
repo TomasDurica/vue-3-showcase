@@ -53,7 +53,7 @@ const isDialogShown = ref(false)
         
       <template v-if="!selected">
         <div class="flex-1">{{ playerCount }} players</div>
-        <button class="btn btn--filled" @click="isDialogShown = true" :disabled="hasErrors">Add Player</button>
+        <button class="btn btn--filled" @click="isDialogShown = true">Add Player</button>
       </template>
 
       <template v-else>
